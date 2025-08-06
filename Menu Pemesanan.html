@@ -1,86 +1,52 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Menu Pesanan</title>
-  <style>
-    body { font-family: Arial; padding: 20px; background: #f4f4f4; }
-    .item, li { background: #fff; padding: 10px; margin: 10px 0; border-radius: 5px; box-shadow: 0 0 5px #ccc; }
-    button { margin-top: 5px; padding: 6px 12px; border: none; border-radius: 5px; cursor: pointer; }
-    .hapus-btn { background: #e74c3c; color: white; margin-left: 10px; }
-    .pesan-btn { background: #3498db; color: white; }
-  </style>
+  <meta charset="UTF-8">
+  <title>Form Pemesanan Makanan</title>
 </head>
 <body>
+  <h2>Form Pemesanan</h2>
 
-<h2>Menu Makanan</h2>
-<div class="menu">
-  <div class="item">
-    <strong>Nasi Goreng</strong><br>Rp25.000<br>
-    <button class="pesan-btn" onclick="tambah('Nasi Goreng', 25000)">Pesan</button>
-  </div>
-  <div class="item">
-    <strong>Mie Ayam</strong><br>Rp22.000<br>
-    <button class="pesan-btn" onclick="tambah('Mie Ayam', 22000)">Pesan</button>
-  </div>
-</div>
+  <label>Menu:</label><br>
+  <input type="text" id="menu"><br><br>
 
-<h2>Daftar Pesanan</h2>
-<ul id="daftar"></ul>
-<p>Total: Rp<span id="total">0</span></p>
-<button onclick="kirimPesanan()">Kirim ke Google Sheet</button>
+  <label>Harga:</label><br>
+  <input type="number" id="harga"><br><br>
 
-<script>
-  const daftar = [];
-  const listEl = document.getElementById("daftar");
-  const totalEl = document.getElementById("total");
+  <button onclick="kirimData()">Kirim</button>
 
-  function tambah(menu, harga) {
-    daftar.push({ menu, harga });
-    render();
-  }
+  <p id="status"></p>
 
-  function hapus(i) {
-    daftar.splice(i, 1);
-    render();
-  }
+  <script>
+    function kirimData() {
+      const menu = document.getElementById("menu").value;
+      const harga = document.getElementById("harga").value;
 
-  function render() {
-    listEl.innerHTML = "";
-    let total = 0;
-    daftar.forEach((item, i) => {
-      total += item.harga;
-      const li = document.createElement("li");
-      li.innerHTML = `${item.menu} - Rp${item.harga.toLocaleString()} 
-        <button class="hapus-btn" onclick="hapus(${i})">Hapus</button>`;
-      listEl.appendChild(li);
-    });
-    totalEl.textContent = total.toLocaleString();
-  }
-
-  function kirimPesanan() {
-    if (daftar.length === 0) {
-      alert("Belum ada pesanan!");
-      return;
-    }
-
-    fetch("https://script.google.com/macros/s/AKfycbz8ZNrGJKNYsy1qBuK9mpszkqO3UC9ga4aNAKs04FEftTipth69UsSucrDtyHGALcxKdQ/exec", {
-      method: "POST",
-      body: JSON.stringify(daftar),
-      headers: {
-        "Content-Type": "text/plain;charset=utf-8"
+      if (!menu || !harga) {
+        document.getElementById("status").innerText = "Mohon isi semua data.";
+        return;
       }
-    })
-    .then(res => res.text())
-    .then(() => {
-      alert("Pesanan dikirim!");
-      daftar.length = 0;
-      render();
-    })
-    .catch(err => alert("Gagal mengirim: " + err));
-  }
-</script>
 
+      const data = [{ menu: menu, harga: parseInt(harga) }];
+
+      fetch("https://script.google.com/macros/s/AKfycbz8ZNrGJKNYsy1qBuK9mpszkqO3UC9ga4aNAKs04FEftTipth69UsSucrDtyHGALcxKdQ/exec", { // GANTI URL DI SINI
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+      })
+      .then(res => res.json())
+      .then(res => {
+        document.getElementById("status").innerText = "✅ Data berhasil dikirim!";
+        document.getElementById("menu").value = "";
+        document.getElementById("harga").value = "";
+      })
+      .catch(err => {
+        document.getElementById("status").innerText = "❌ Gagal mengirim data.";
+        console.error(err);
+      });
+    }
+  </script>
 </body>
 </html>
