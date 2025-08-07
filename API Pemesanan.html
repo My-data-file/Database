@@ -1,0 +1,206 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Form Pemesanan Makanan & Minuman</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f0f2f5;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 25px;
+      color: #333;
+    }
+
+    label {
+      font-weight: 600;
+      display: block;
+      margin-top: 20px;
+      margin-bottom: 8px;
+    }
+
+    input[type="text"], input[type="number"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 12px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    .menu-section {
+      margin-top: 20px;
+    }
+
+    .menu-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .menu-table th, .menu-table td {
+      padding: 10px;
+      text-align: left;
+    }
+
+    .menu-table th {
+      background-color: #f8f8f8;
+    }
+
+    .menu-table input {
+      width: 60px;
+      text-align: center;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 5px;
+    }
+
+    .total-section {
+      margin-top: 20px;
+    }
+
+    .total-section input {
+      background-color: #e9ecef;
+      font-weight: bold;
+    }
+
+    button {
+      width: 100%;
+      background-color: #28a745;
+      color: white;
+      padding: 12px;
+      margin-top: 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #218838;
+    }
+
+    #status {
+      text-align: center;
+      margin-top: 20px;
+      color: green;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Form Pemesanan</h2>
+    <form id="myForm">
+      <label for="nama">Nama Pemesan:</label>
+      <input type="text" name="nama" id="nama" required autocomplete="off">
+
+      <div class="menu-section">
+        <label>Makanan</label>
+        <table class="menu-table">
+          <tr><th>Nama</th><th>Harga</th><th>Jumlah</th></tr>
+          <tr><td>Nasi Goreng</td><td>15.000</td><td><input type="number" name="Nasi Goreng" min="0" value="0"></td></tr>
+          <tr><td>Mie Ayam</td><td>12.000</td><td><input type="number" name="Mie Ayam" min="0" value="0"></td></tr>
+          <tr><td>Sate Ayam</td><td>20.000</td><td><input type="number" name="Sate Ayam" min="0" value="0"></td></tr>
+        </table>
+      </div>
+
+      <div class="menu-section">
+        <label>Minuman</label>
+        <table class="menu-table">
+          <tr><th>Nama</th><th>Harga</th><th>Jumlah</th></tr>
+          <tr><td>Es Teh</td><td>5.000</td><td><input type="number" name="Es Teh" min="0" value="0"></td></tr>
+          <tr><td>Jus Jeruk</td><td>7.000</td><td><input type="number" name="Jus Jeruk" min="0" value="0"></td></tr>
+          <tr><td>Kopi</td><td>8.000</td><td><input type="number" name="Kopi" min="0" value="0"></td></tr>
+        </table>
+      </div>
+
+      <div class="total-section">
+        <label>Total Bayar (Rp):</label>
+        <input type="text" id="totalBayar" name="total" readonly>
+      </div>
+
+      <button type="submit">Kirim Pemesanan</button>
+    </form>
+
+    <div id="status"></div>
+  </div>
+
+  <script>
+    const harga = {
+      "Nasi Goreng": 15000,
+      "Mie Ayam": 12000,
+      "Sate Ayam": 20000,
+      "Es Teh": 5000,
+      "Jus Jeruk": 7000,
+      "Kopi": 8000
+    };
+
+    const form = document.getElementById("myForm");
+    const totalBayar = document.getElementById("totalBayar");
+
+    function formatRupiah(angka) {
+      return angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    form.addEventListener("input", () => {
+      let total = 0;
+      for (let item in harga) {
+        const jumlah = parseInt(form[item].value) || 0;
+        total += jumlah * harga[item];
+      }
+      totalBayar.value = formatRupiah(total);
+    });
+
+    form.addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      const rawTotal = Object.keys(harga).reduce((sum, item) => {
+        const qty = parseInt(form[item].value) || 0;
+        return sum + (qty * harga[item]);
+      }, 0);
+
+      const data = {
+        nama: form.nama.value,
+        total: rawTotal,
+        pesanan: {}
+      };
+
+      for (let item in harga) {
+        const qty = parseInt(form[item].value) || 0;
+        if (qty > 0) {
+          data.pesanan[item] = qty;
+        }
+      }
+
+      fetch("https://script.google.com/macros/s/AKfycbyA0C51kqnxefgOpBEuUlYaqVQjsCXTub8DszaA0lezj-c5JHamTjWoDfXqs48f0x-KzA/exec", {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+
+      document.getElementById("status").innerText = "✅ Pemesanan berhasil dikirim!";
+      form.reset();
+      totalBayar.value = '';
+    });
+  </script>
+</body>
+</html>
