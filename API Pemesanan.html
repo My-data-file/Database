@@ -1,8 +1,8 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Form Pemesanan Makanan & Minuman</title>
   <style>
     * {
@@ -103,6 +103,31 @@
       color: green;
       font-weight: bold;
     }
+
+    /* RESPONSIVE DESIGN */
+    @media (max-width: 600px) {
+      .menu-table th, .menu-table td {
+        font-size: 14px;
+        padding: 6px;
+      }
+
+      input[type="text"], input[type="number"], button {
+        font-size: 14px;
+        padding: 8px;
+      }
+
+      h2 {
+        font-size: 20px;
+      }
+
+      label {
+        font-size: 14px;
+      }
+
+      .container {
+        padding: 20px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -172,6 +197,11 @@
     form.addEventListener("submit", function(e) {
       e.preventDefault();
 
+      if (!form.nama.value.trim()) {
+        alert("Nama pemesan harus diisi!");
+        return;
+      }
+
       const rawTotal = Object.keys(harga).reduce((sum, item) => {
         const qty = parseInt(form[item].value) || 0;
         return sum + (qty * harga[item]);
@@ -190,7 +220,7 @@
         }
       }
 
-      fetch("https://script.google.com/macros/s/AKfycbyA0C51kqnxefgOpBEuUlYaqVQjsCXTub8DszaA0lezj-c5JHamTjWoDfXqs48f0x-KzA/exec", {
+      fetch("https://script.google.com/macros/s/YOUR_SCRIPT_ID_HERE/exec", {
         method: "POST",
         mode: "no-cors",
         headers: { "Content-Type": "application/json" },
